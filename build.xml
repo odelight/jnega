@@ -1,0 +1,14 @@
+<project name="jnega" default="build" basedir=".">
+	
+	<target name="build">
+		<antcall target="tsc"/>
+	</target>
+		
+	<target name="tsc">
+		<exec executable="cmd" dir="${basedir}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="tsc"/>
+		</exec>
+	</target>
+	
+</project>
