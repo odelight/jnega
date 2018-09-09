@@ -10,6 +10,6 @@
         "noImplicitThis": true
     },
     "include": [
-        "./src/**/*"
+        "./src/*"
         ]
 }
