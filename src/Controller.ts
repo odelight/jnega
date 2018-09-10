@@ -16,7 +16,7 @@ export class Controller{
     }
 
     static staticOnMouseMove(event : MouseEvent) {
-        //Controller.instance.onMouseMove(event);
+        Controller.instance.onMouseMove(event);
     }
     
     static staticOnMouseClick(event : MouseEvent) {
@@ -35,7 +35,8 @@ export class Controller{
         this.view.click(new Point(event.clientX, event.clientY));
     }
 
-    onScreenTouch(event : TouchEvent) {
-    
+    onMouseMove(event : MouseEvent) {
+        this.view.cursorMove(new Point(event.clientX, event.clientY));
     }
+
 }

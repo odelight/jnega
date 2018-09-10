@@ -5,6 +5,7 @@ import { Segment } from "../Model/Segment.js";
 export class View {
     private model : Model;
     private lineStart : Point | null = null;
+    private cursorPosition : Point | null = null;
     private ctx : CanvasRenderingContext2D;
 
     constructor(ctx : CanvasRenderingContext2D, model : Model) {
@@ -21,11 +22,28 @@ export class View {
         }
     }
 
-    draw() {
-        this.drawSegments();
+    cursorMove(point : Point) {
+        this.cursorPosition = point;
     }
 
-    drawSegments() {
+    draw() {
+        this.clear();
+        this.drawCurrentSegment();
+        this.drawPlacedSegments();
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+
+    drawCurrentSegment() {
+        if(this.lineStart == null || this.cursorPosition == null) {
+            return;
+        }
+        this.drawSegment(new Segment(this.lineStart, this.cursorPosition))
+    }
+
+    drawPlacedSegments() {
         let segments : Segment[] = this.model.getSegments();
         segments.forEach((s) => this.drawSegment(s));
     }

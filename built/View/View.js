@@ -1,6 +1,8 @@
+import { Segment } from "../Model/Segment.js";
 export class View {
     constructor(ctx, model) {
         this.lineStart = null;
+        this.cursorPosition = null;
         this.ctx = ctx;
         this.model = model;
     }
@@ -13,10 +15,24 @@ export class View {
             this.lineStart = null;
         }
     }
-    draw() {
-        this.drawSegments();
+    cursorMove(point) {
+        this.cursorPosition = point;
     }
-    drawSegments() {
+    draw() {
+        this.clear();
+        this.drawCurrentSegment();
+        this.drawPlacedSegments();
+    }
+    clear() {
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+    drawCurrentSegment() {
+        if (this.lineStart == null || this.cursorPosition == null) {
+            return;
+        }
+        this.drawSegment(new Segment(this.lineStart, this.cursorPosition));
+    }
+    drawPlacedSegments() {
         let segments = this.model.getSegments();
         segments.forEach((s) => this.drawSegment(s));
     }
