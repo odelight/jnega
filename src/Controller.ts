@@ -32,11 +32,11 @@ export class Controller{
     }
 
     onMouseClick(event : MouseEvent){
-        this.view.click(new Point(event.clientX, event.clientY));
+        this.view.click(new Point(event.offsetX, event.offsetY));
     }
 
     onMouseMove(event : MouseEvent) {
-        this.view.cursorMove(new Point(event.clientX, event.clientY));
+        this.view.cursorMove(new Point(event.offsetX, event.offsetY));
     }
 
 }
