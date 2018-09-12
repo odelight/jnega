@@ -21,9 +21,9 @@ export class Controller {
         //Controller.instance.onTouchMove(event);
     }
     onMouseClick(event) {
-        this.view.click(new Point(event.clientX, event.clientY));
+        this.view.click(new Point(event.offsetX, event.offsetY));
     }
     onMouseMove(event) {
-        this.view.cursorMove(new Point(event.clientX, event.clientY));
+        this.view.cursorMove(new Point(event.offsetX, event.offsetY));
     }
 }
