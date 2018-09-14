@@ -7,16 +7,11 @@ export class Controller{
     private firstPoint : Point;
     
     private constructor(canvas : HTMLCanvasElement, view : View) {
-        if (!Controller.instance) {
-            Controller.instance = this;
-            this.view = view;
-            canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
-            canvas.addEventListener('click', (event) => this.onMouseClick(event));
-            canvas.addEventListener('touchstart', (event) => this.onScreenTouch(event));
-            canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
-        }
-        else
-            console.warn("Controller already exists. An attempt to create another instance of Controller was made.");
+        this.view = view;
+        canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
+        canvas.addEventListener('click', (event) => this.onMouseClick(event));
+        canvas.addEventListener('touchstart', (event) => this.onScreenTouch(event));
+        canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
     }
 
     static getInstance(canvas ?: HTMLCanvasElement, view ?: View) : Controller {
