@@ -6,7 +6,7 @@ export class Controller{
     private view : View;
     private firstPoint : Point;
     
-    constructor(canvas : HTMLCanvasElement, view : View) {
+    private constructor(canvas : HTMLCanvasElement, view : View) {
         if (!Controller.instance) {
             Controller.instance = this;
             this.view = view;
@@ -19,8 +19,19 @@ export class Controller{
             console.warn("Controller already exists. An attempt to create another instance of Controller was made.");
     }
 
+    static getInstance(canvas ?: HTMLCanvasElement, view ?: View) : Controller {
+        if (!Controller.instance) {
+            if (canvas == undefined || view == undefined)
+                console.error("Controller must be initialized by passing a canvas and view to getInstance.");
+            else
+                Controller.instance = new Controller(canvas, view);
+        }
+
+        return Controller.instance;
+    }
 
 
+    
     onMouseClick(event : MouseEvent){
         this.view.click(new Point(event.offsetX, event.offsetY));
     }
