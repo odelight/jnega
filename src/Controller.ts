@@ -6,37 +6,41 @@ export class Controller{
     private view : View;
     private firstPoint : Point;
     
-    constructor(canvas : HTMLCanvasElement, view : View) {
-        canvas.addEventListener('mousemove',Controller.staticOnMouseMove);
-        canvas.addEventListener('click', Controller.staticOnMouseClick);
-        canvas.addEventListener('touchstart', Controller.staticOnScreenTouch);
-        canvas.addEventListener('touchmove', Controller.staticOnTouchMove);
-        Controller.instance = this;
+    private constructor(canvas : HTMLCanvasElement, view : View) {
         this.view = view;
+        canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
+        canvas.addEventListener('click', (event) => this.onMouseClick(event));
+        canvas.addEventListener('touchstart', (event) => this.onScreenTouch(event));
+        canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
     }
 
-    static staticOnMouseMove(event : MouseEvent) {
-        Controller.instance.onMouseMove(event);
+    static getInstance(canvas ?: HTMLCanvasElement, view ?: View) : Controller {
+        if (!Controller.instance) {
+            if (canvas == undefined || view == undefined)
+                console.error("Controller must be initialized by passing a canvas and view to getInstance.");
+            else
+                Controller.instance = new Controller(canvas, view);
+        }
+
+        return Controller.instance;
     }
+
+
     
-    static staticOnMouseClick(event : MouseEvent) {
-        Controller.instance.onMouseClick(event);
-    }
-
-    static staticOnScreenTouch(event : TouchEvent) {
-        //Controller.instance.onScreenTouch(event);
-    }
-
-    static staticOnTouchMove(event : TouchEvent) {
-       //Controller.instance.onTouchMove(event);
-    }
-
     onMouseClick(event : MouseEvent){
-        this.view.click(new Point(event.clientX, event.clientY));
+        this.view.click(new Point(event.offsetX, event.offsetY));
     }
 
     onMouseMove(event : MouseEvent) {
-        this.view.cursorMove(new Point(event.clientX, event.clientY));
+        this.view.cursorMove(new Point(event.offsetX, event.offsetY));
+    }
+
+    onScreenTouch(event : TouchEvent) {
+        //handle screen touch event;
+    }
+
+    onTouchMove(event : TouchEvent) {
+       // handle screen touch movement event;
     }
 
 }
