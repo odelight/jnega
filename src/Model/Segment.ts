@@ -10,4 +10,8 @@ export class Segment {
         this.b = b;
         this.material = material;
     }
+
+    length() : number {
+        return this.a.distanceTo(this.b);
+    }
 }
