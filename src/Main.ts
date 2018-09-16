@@ -13,7 +13,7 @@ start();
 function start() {
     model = new Model();
     view = new View(Util.checkType(canvas.getContext("2d"), CanvasRenderingContext2D), model);
-    controller = new Controller(canvas, view);
+    controller = Controller.getInstance(canvas, view);
 	let updateVar = setInterval(tick, 10);
 }
 
