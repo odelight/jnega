@@ -10,6 +10,9 @@ export class Controller{
         this.view = view;
         canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
         canvas.addEventListener('click', (event) => this.onMouseClick(event));
+        document.addEventListener('keydown', (event) => this.onKeyPress(event));
+
+
         canvas.addEventListener('touchstart', (event) => this.onScreenTouch(event));
         canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
     }
@@ -35,6 +38,13 @@ export class Controller{
         this.view.cursorMove(new Point(event.offsetX, event.offsetY));
     }
 
+    onKeyPress(event : KeyboardEvent) {
+        if(event.code == "KeyS"){
+            this.view.start();
+            event.preventDefault();
+        }
+
+    }
     onScreenTouch(event : TouchEvent) {
         //handle screen touch event;
     }

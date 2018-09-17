@@ -4,16 +4,50 @@ import { Material } from "./Material.js";
 import { ModelInternal } from "./ModelInternal.js";
 
 export class ModelAPI {
-    segments : Segment[];
-    internalModel : ModelInternal;
+    private segments : Segment[];
+    private fixedPoints : Point[];
+    private internalModel : ModelInternal | null = null;
+    private running : boolean = false;
+
+    constructor() {
+        this.fixedPoints = []
+        this.segments = [];
+    }
 
     pushSegment(a : Point, b : Point, material : Material) {
-        this.segments.push(new Segment(a,b, material));
+        if(!this.running || this.internalModel == null) {
+            this.segments.push(new Segment(a,b, material));
+        } else {
+            throw "Attempted to add segment after simulation started";
+        }
     }
 
     getSegments() : Segment[]  {
-        return this.segments;
+        if(!this.running || this.internalModel == null) {
+            return this.segments;
+        } else {
+            return this.internalModel.getSegments();
+        }
     }
 
+    pushFixedPoint(p : Point) {
+        this.fixedPoints.push(p);
+    }
+
+    start() {
+        this.running = true;
+        this.internalModel = new ModelInternal(this.segments, this.fixedPoints);
+    }
+
+    step() {
+        if(!this.running || this.internalModel == null) {
+            throw "Called step before model started successfully";
+        }
+        this.internalModel.step();
+    }
+
+    isRunning() {
+        return this.running && this.internalModel != null;
+    }
     
 }

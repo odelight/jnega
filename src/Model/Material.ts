@@ -1,19 +1,18 @@
+
 export class Material {
     maxStretch: number;
     density : number;
     springCoefficient : number;
     dampingCoefficient : number;
     
-    constructor(density : number, springCoefficient : number, dampingCoefficient : number, maxStretch : number) {
+    constructor(density : number, springCoefficient : number, maxStretch : number, dampingRatio : number = 1) {
         this.density = density;
         this.springCoefficient = springCoefficient;
-        this.dampingCoefficient = dampingCoefficient;
+        let criticalDamping = Math.sqrt(2*this.springCoefficient*this.density);
+        this.dampingCoefficient = dampingRatio*criticalDamping;
         this.maxStretch = maxStretch;
     }
 }
 
-export class Wood extends Material {
-    constructor() {
-        super(0.1, 100, 10, 0.25);
-    }
-}
+let wood = new Material(0.1, 120, 0.25);
+export {wood};

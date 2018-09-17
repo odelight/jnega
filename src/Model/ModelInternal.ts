@@ -4,12 +4,17 @@ import { Material } from "./Material.js";
 import { Vector } from "../Math/Vector.js";
 
 export class ModelInternal {
-    private static G = new Vector(0, -10);
+    private static G = new Vector(0, 1);
     private timeStep = 0.1;
     private segments : InternalSegment[];
     private points : InternalPoint[];
-    public constructor(segments : Segment[]) {
+    public constructor(segments : Segment[], fixedPoints : Point[]) {
+        this.segments = [];
+        this.points = [];
         let vertexSet = new VertexSet();
+        for(let p of fixedPoints) {
+            vertexSet.addFixedPoint(p);
+        }
         for (let seg of segments) {
             let m = seg.material.density * seg.length();
             let a = vertexSet.getInternalPoint(seg.a);
@@ -25,7 +30,9 @@ export class ModelInternal {
     }
 
     public getSegments() : Segment[] {
-        return this.segments.map((iseg) => new Segment(iseg.endA.position, iseg.endB.position, iseg.material));
+        return this.segments
+        .filter(s =>!s.isBroken())
+        .map((iseg) => new Segment(iseg.endA.position, iseg.endB.position, iseg.material));
     }
 
     public getPoints() : Point[] {
@@ -38,7 +45,7 @@ export class ModelInternal {
     }
 
     private calculateForces()  {
-        let forceMap : ForceMap
+        let forceMap : ForceMap = new ForceMap();
         for(let s of this.segments) {
             let t = s.getTension();
             let segmentDirection = s.endA.position.vectorTo(s.endB.position).unitVector();
@@ -53,8 +60,8 @@ export class ModelInternal {
 
     private euler(dt : number, forceMap : ForceMap) {
         for(let p of this.points) {
-            p.position = p.position.offsetBy(p.v.scalarProduct(dt).plus(forceMap.getForce(p).scalarProduct((dt*dt)/(2*p.m))));
             p.v = p.v.plus(forceMap.getForce(p).scalarProduct((dt)/(2*p.m)));
+            p.position = p.position.offsetBy(p.v.scalarProduct(dt));
         }
     }
 
@@ -68,16 +75,21 @@ class ForceMap {
     }
 
     public addForce(p : InternalPoint, v : Vector) {
-        if(this.innerMap.has(p.id)) {
-            this.innerMap.set(p.id, this.innerMap.get(p.id).plus(v));
+        if(p.fixed) {
+            return;
+        }
+        let f = this.innerMap.get(p.id);
+        if(f != null) {
+            this.innerMap.set(p.id, f.plus(v));
         } else {
             this.innerMap.set(p.id, v);
         }
     }
 
     public getForce(p : InternalPoint) : Vector {
-        if(this.innerMap.has(p.id)) {
-            return this.innerMap.get(p.id);
+        let f = this.innerMap.get(p.id);
+        if(f != null) {
+            return f;
         } else {
             return new Vector(0,0);
         }
@@ -91,13 +103,20 @@ class VertexSet {
         this.innerMap = new Map();
     }
 
+    addFixedPoint(p : Point) {
+        let ip = new InternalPoint(p);
+        ip.fixed = true;
+        this.innerMap.set(p.hash(), ip);
+    }
+
     getInternalPoint(p : Point) : InternalPoint {
-        if(this.innerMap.has(p.hash())) {
-            return this.innerMap.get(p.hash());
+        let ip = this.innerMap.get(p.hash())
+        if(ip != null) {
+            return ip;
         } else {
-            let v = new InternalPoint(p);
-            this.innerMap.set(p.hash(), v);
-            return v;
+            ip = new InternalPoint(p);
+            this.innerMap.set(p.hash(), ip);
+            return ip;
         }
     }
 
@@ -109,6 +128,7 @@ class VertexSet {
 //internal point representation
 class InternalPoint {
     private static nextId : number = 0;
+    fixed : boolean = false;
     id : number;
     position : Point;
     v : Vector;
@@ -144,7 +164,14 @@ class InternalSegment {
         if(this.broken) {
             return 0;
         }
-        return this.getLengthRatio()*this.material.springCoefficient + this.getLengthVelocity()*this.material.dampingCoefficient;
+        let springForce = (this.getLengthRatio()-1)*this.material.springCoefficient;
+        let dampingForce = this.getLengthVelocity()*this.material.dampingCoefficient*this.initialLength;
+        console.log("spring force: " + springForce + " -- dampingForce: " + dampingForce + " -- y: " + this.endB.position.y);
+        return springForce + dampingForce;
+    }
+
+    public isBroken() {
+        return this.broken;
     }
 
     private getLengthRatio() : number {
@@ -154,7 +181,8 @@ class InternalSegment {
     private getLengthVelocity() : number {
         let displacement = this.endA.position.vectorTo(this.endB.position);
         let velocityDiff = this.endB.v.minus(this.endA.v);
-        return displacement.innerProduct(velocityDiff) / this.currentLength() ;
+        let unscaledVelocity = displacement.innerProduct(velocityDiff) / this.currentLength() ;
+        return unscaledVelocity / this.initialLength;
     }
 
     private currentLength() : number {
