@@ -18,12 +18,6 @@ export class Point {
         return Point.hashConstant*this.x + this.y;
     }
 
-    static unhash(hash : number) : Point {
-        let y = hash % this.hashConstant;
-        let x = (hash - y) / this.hashConstant;
-        return new Point(x,y);
-    }
-
     vectorTo(other : Point) : Vector {
         return new Vector(other.x - this.x, other.y - this.y);
     }
