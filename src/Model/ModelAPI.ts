@@ -5,12 +5,12 @@ import { ModelInternal } from "./ModelInternal.js";
 
 export class ModelAPI {
     private segments : Segment[];
-    private fixedPoints : Point[];
+    private scriptedPoints : ((t : number) => Point)[];
     private internalModel : ModelInternal | null = null;
     private running : boolean = false;
 
     constructor() {
-        this.fixedPoints = []
+        this.scriptedPoints = []
         this.segments = [];
     }
 
@@ -30,13 +30,13 @@ export class ModelAPI {
         }
     }
 
-    pushFixedPoint(p : Point) {
-        this.fixedPoints.push(p);
+    pushScriptedPoint(path : (t : number) => Point) {
+        this.scriptedPoints.push(path);
     }
 
     start() {
         this.running = true;
-        this.internalModel = new ModelInternal(this.segments, this.fixedPoints);
+        this.internalModel = new ModelInternal(this.segments, this.scriptedPoints);
     }
 
     step() {
