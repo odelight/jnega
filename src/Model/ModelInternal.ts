@@ -8,12 +8,12 @@ export class ModelInternal {
     private timeStep = 0.1;
     private segments : InternalSegment[];
     private points : InternalPoint[];
-    public constructor(segments : Segment[], fixedPoints : Point[]) {
+    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[]) {
         this.segments = [];
         this.points = [];
         let vertexSet = new VertexSet();
         for(let p of fixedPoints) {
-            vertexSet.addFixedPoint(p);
+            vertexSet.addScriptedPoint(p);
         }
         for (let seg of segments) {
             let m = seg.material.density * seg.length();
@@ -60,8 +60,8 @@ export class ModelInternal {
 
     private euler(dt : number, forceMap : ForceMap) {
         for(let p of this.points) {
-            p.v = p.v.plus(forceMap.getForce(p).scalarProduct((dt)/(2*p.m)));
-            p.position = p.position.offsetBy(p.v.scalarProduct(dt));
+            let f = forceMap.getForce(p);
+            p.step(dt,f);
         }
     }
 
@@ -75,7 +75,7 @@ class ForceMap {
     }
 
     public addForce(p : InternalPoint, v : Vector) {
-        if(p.fixed) {
+        if(p.scripted) {
             return;
         }
         let f = this.innerMap.get(p.id);
@@ -103,10 +103,9 @@ class VertexSet {
         this.innerMap = new Map();
     }
 
-    addFixedPoint(p : Point) {
-        let ip = new InternalPoint(p);
-        ip.fixed = true;
-        this.innerMap.set(p.hash(), ip);
+    addScriptedPoint(p : (t : number) => Point) {
+        let ip = new ScriptedPoint(p);
+        this.innerMap.set(p(0).hash(), ip);
     }
 
     getInternalPoint(p : Point) : InternalPoint {
@@ -128,7 +127,6 @@ class VertexSet {
 //internal point representation
 class InternalPoint {
     private static nextId : number = 0;
-    fixed : boolean = false;
     id : number;
     position : Point;
     v : Vector;
@@ -140,6 +138,35 @@ class InternalPoint {
         this.v = new Vector(0,0);
         this.m = 0;
         this.id = InternalPoint.nextId++;
+    }
+    
+    get scripted() {
+        return false;
+    }
+
+    step(dt : number, f: Vector = new Vector(0,0)) {
+        this.v = this.v.plus(f.scalarProduct((dt)/(2*this.m)));
+        this.position = this.position.offsetBy(this.v.scalarProduct(dt));
+    }
+
+}
+
+class ScriptedPoint extends InternalPoint {
+    private t : number;
+    private path : (t : number) => Point
+    constructor(path : (t : number) => Point) {
+        super(path(0));
+        this.path = path;
+        this.t = 0;
+    }
+
+    step(dt : number, f: Vector = new Vector(0,0)) {
+        this.t += dt;
+        this.position = this.path(this.t);
+    }
+
+    get scripted() {
+        return true;
     }
 }
 

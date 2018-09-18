@@ -40,9 +40,9 @@ export class Controller{
         return Controller.instance;
     }
 
-    pushFixedPoint(point : Point) {
-        this.addPointToMap(point);
-        this.model.pushFixedPoint(point);
+    pushScriptedPoint(path : (t : number) => Point) {
+        this.addPointToMap(path(0));
+        this.model.pushScriptedPoint(path);
     }
 
     pushSegment(a : Point, b : Point, material : Material) {
