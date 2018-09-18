@@ -1,14 +1,15 @@
 import { Point } from "../Model/Point.js";
-import { Model } from "../Model/Model.js";
+import { ModelAPI } from "../Model/ModelAPI.js";
 import { Segment } from "../Model/Segment.js";
+import { Material, wood } from "../Model/Material.js";
 
 export class View {
-    private model : Model;
+    private model : ModelAPI;
     private lineStart : Point | null = null;
     private cursorPosition : Point | null = null;
     private ctx : CanvasRenderingContext2D;
 
-    constructor(ctx : CanvasRenderingContext2D, model : Model) {
+    constructor(ctx : CanvasRenderingContext2D, model : ModelAPI) {
         this.ctx = ctx;
         this.model = model;
     }
@@ -19,6 +20,10 @@ export class View {
 
     setCursorPosition(point : Point) {
         this.cursorPosition = point;
+    }
+
+    start() {
+        this.model.start();
     }
 
     draw() {
@@ -35,7 +40,7 @@ export class View {
         if(this.lineStart == null || this.cursorPosition == null) {
             return;
         }
-        this.drawSegment(new Segment(this.lineStart, this.cursorPosition))
+        this.drawSegment(new Segment(this.lineStart, this.cursorPosition, wood))
     }
 
     drawPlacedSegments() {
