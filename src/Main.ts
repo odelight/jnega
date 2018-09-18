@@ -17,17 +17,17 @@ start();
 
 function start() {
     model = new ModelAPI();
-    initLevel(model);
     view = new View(Util.checkType(canvas.getContext("2d"), CanvasRenderingContext2D), model);
-    controller = Controller.getInstance(canvas, view);
+    controller = Controller.getInstance(canvas, model, view);
+    initLevel(controller);
 	let updateVar = setInterval(tick, 10);
 }
 
-function initLevel(model : ModelAPI) {
-    model.pushScriptedPoint(basicSineWave(new Point(40,10), new Vector(30,0), 40));
-    model.pushScriptedPoint(basicSineWave(new Point(360,10), new Vector(30,0), 40));
-    model.pushSegment(new Point(40,10), new Point(200,40), wood);
-    model.pushSegment(new Point(360,10), new Point(200,40), wood);
+function initLevel(controller : Controller) {
+    controller.pushScriptedPoint(basicSineWave(new Point(40,10), new Vector(30,0), 40));
+    controller.pushScriptedPoint(basicSineWave(new Point(360,10), new Vector(30,0), 40));
+    controller.pushSegment(new Point(40,10), new Point(200,40), wood);
+    controller.pushSegment(new Point(360,10), new Point(200,40), wood);
 }
 
 
