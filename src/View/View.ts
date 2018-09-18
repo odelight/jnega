@@ -13,16 +13,11 @@ export class View {
         this.model = model;
     }
     
-    click(point : Point) {
-        if(this.lineStart == null) {
-            this.lineStart = point;
-        } else {
-            this.model.pushSegment(this.lineStart, point);
-            this.lineStart = null;
-        }
+    setLineStart(point : Point | null) {
+        this.lineStart = point;
     }
 
-    cursorMove(point : Point) {
+    setCursorPosition(point : Point) {
         this.cursorPosition = point;
     }
 

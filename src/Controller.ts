@@ -1,12 +1,15 @@
 import { Point } from "./Model/Point.js";
 import { View } from "./View/View.js";
+import { Model } from "./Model/Model.js";
 
 export class Controller{
     private static instance : Controller;
+    private model : Model;
     private view : View;
-    private firstPoint : Point;
+    private lineStart : Point | null;
     
-    private constructor(canvas : HTMLCanvasElement, view : View) {
+    private constructor(canvas : HTMLCanvasElement, model: Model, view : View) {
+        this.model = model;
         this.view = view;
         canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
         canvas.addEventListener('click', (event) => this.onMouseClick(event));
@@ -14,12 +17,12 @@ export class Controller{
         canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
     }
 
-    static getInstance(canvas ?: HTMLCanvasElement, view ?: View) : Controller {
+    static getInstance(canvas ?: HTMLCanvasElement, model ?: Model, view ?: View) : Controller {
         if (!Controller.instance) {
-            if (canvas == undefined || view == undefined)
-                console.error("Controller must be initialized by passing a canvas and view to getInstance.");
+            if (canvas == undefined || model == undefined || view == undefined)
+                console.error("Controller must be initialized by passing a canvas, model, and view to getInstance.");
             else
-                Controller.instance = new Controller(canvas, view);
+                Controller.instance = new Controller(canvas, model, view);
         }
 
         return Controller.instance;
@@ -27,12 +30,22 @@ export class Controller{
 
 
     
+    private placePoint(point : Point) {
+        if(this.lineStart == null) {
+            this.lineStart = point;
+        } else {
+            this.model.pushSegment(this.lineStart, point);
+            this.lineStart = null;
+        }
+    }
+
     onMouseClick(event : MouseEvent){
-        this.view.click(new Point(event.offsetX, event.offsetY));
+        this.placePoint(new Point(event.offsetX, event.offsetY));
+        this.view.setLineStart(this.lineStart);
     }
 
     onMouseMove(event : MouseEvent) {
-        this.view.cursorMove(new Point(event.offsetX, event.offsetY));
+        this.view.setCursorPosition(new Point(event.offsetX, event.offsetY));
     }
 
     onScreenTouch(event : TouchEvent) {
