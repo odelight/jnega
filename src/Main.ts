@@ -15,17 +15,17 @@ start();
 
 function start() {
     model = new ModelAPI();
-    initLevel(model);
     view = new View(Util.checkType(canvas.getContext("2d"), CanvasRenderingContext2D), model);
     controller = Controller.getInstance(canvas, model, view);
+    initLevel(controller);
 	let updateVar = setInterval(tick, 10);
 }
 
-function initLevel(model : ModelAPI) {
-    model.pushFixedPoint(new Point(10,10));
-    model.pushFixedPoint(new Point(390,10));
-    model.pushSegment(new Point(10,10), new Point(200,40), wood);
-    model.pushSegment(new Point(390,10), new Point(200,40), wood);
+function initLevel(controller : Controller) {
+    controller.pushFixedPoint(new Point(10,10));
+    controller.pushFixedPoint(new Point(390,10));
+    controller.pushSegment(new Point(10,10), new Point(200,40), wood);
+    controller.pushSegment(new Point(390,10), new Point(200,40), wood);
 }
 
 function tick() {

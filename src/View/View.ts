@@ -8,10 +8,24 @@ export class View {
     private lineStart : Point | null = null;
     private cursorPosition : Point | null = null;
     private ctx : CanvasRenderingContext2D;
+    private cursorImage : ImageData;
+    private cursorSize : number;
 
     constructor(ctx : CanvasRenderingContext2D, model : ModelAPI) {
         this.ctx = ctx;
         this.model = model;
+        this.setCursorImage();
+    }
+
+    private setCursorImage() {
+        this.cursorSize = 3;
+        this.cursorImage = this.ctx.createImageData(this.cursorSize, this.cursorSize);
+        for (let i : number = 0; i < this.cursorSize * this.cursorSize * 4; i += 4) {
+            this.cursorImage.data[i] = 0x00;
+            this.cursorImage.data[i+1] = 0x00;
+            this.cursorImage.data[i+2] = 0xFF;
+            this.cursorImage.data[i+3] = 0xFF;
+        }
     }
     
     setLineStart(point : Point | null) {
@@ -22,18 +36,23 @@ export class View {
         this.cursorPosition = point;
     }
 
-    start() {
-        this.model.start();
-    }
-
     draw() {
         this.clear();
         this.drawCurrentSegment();
         this.drawPlacedSegments();
+        this.drawCursorPosition();
     }
 
     clear() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+
+    drawCursorPosition() {
+        if (this.cursorPosition == null || this.model.isRunning())
+            return;
+
+        let offset : number = Math.trunc(this.cursorSize / 2);
+        this.ctx.putImageData(this.cursorImage, this.cursorPosition.x - offset, this.cursorPosition.y - offset);
     }
 
     drawCurrentSegment() {
