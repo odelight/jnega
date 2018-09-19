@@ -144,6 +144,10 @@ export class Controller{
             this.model.start();
             event.preventDefault();
         }
+        if (event.code == "KeyD") {
+            this.clearPoint();
+            event.preventDefault();
+        }
 
     }
 
