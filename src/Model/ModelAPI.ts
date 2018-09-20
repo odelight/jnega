@@ -39,6 +39,11 @@ export class ModelAPI {
         this.internalModel = new ModelInternal(this.segments, this.scriptedPoints);
     }
 
+    abort() {
+        this.running = false;
+        this.internalModel = null;
+    }
+
     step() {
         if(!this.running || this.internalModel == null) {
             throw "Called step before model started successfully";
