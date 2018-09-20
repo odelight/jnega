@@ -34,6 +34,14 @@ export class ModelAPI {
         this.scriptedPoints.push(path);
     }
 
+    getScriptedPoints() : Point[] {
+        if(!this.running || this.internalModel == null) {
+            return this.scriptedPoints.map(sp => sp(0));
+        } else {
+            return this.internalModel.getScriptedPoints();
+        }    
+    }
+
     start() {
         this.running = true;
         this.internalModel = new ModelInternal(this.segments, this.scriptedPoints);
