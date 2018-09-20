@@ -141,7 +141,11 @@ export class Controller{
     onKeyPress(event : KeyboardEvent) {
         if (event.code == "KeyS") {
             this.clearPoint();
-            this.model.start();
+            if(this.model.isRunning()) {
+                this.model.abort();
+            } else {
+                this.model.start();
+            }
             event.preventDefault();
         }
         if (event.code == "KeyD") {
