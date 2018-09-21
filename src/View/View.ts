@@ -2,6 +2,7 @@ import { Point } from "../Model/Point.js";
 import { ModelAPI } from "../Model/ModelAPI.js";
 import { Segment } from "../Model/Segment.js";
 import { Material, wood } from "../Model/Material.js";
+import { getColorFromStretch } from "./SegmentColor.js";
 
 export class View {
     private model : ModelAPI;
@@ -70,7 +71,7 @@ export class View {
 
     drawSegment(segment : Segment) {
       this.ctx.save();
-	  this.ctx.strokeStyle = "#ff0000"
+	  this.ctx.strokeStyle = getColorFromStretch(segment.getStretch());
       this.ctx.beginPath();
       this.ctx.moveTo(segment.a.x, segment.a.y);
       this.ctx.lineTo(segment.b.x, segment.b.y);
@@ -83,7 +84,9 @@ export class View {
         let pts = this.model.getScriptedPoints();
         this.ctx.save();
         this.ctx.fillStyle = "#00ff00";
+        this.ctx.strokeStyle = "#ffffff";
         for(let p of pts) {
+            this.ctx.strokeRect(p.x -3, p.y -3, 6, 6);
             this.ctx.fillRect(p.x - 3, p.y -3, 6,6);
         }
         this.ctx.restore();

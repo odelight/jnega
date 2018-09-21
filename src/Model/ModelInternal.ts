@@ -32,7 +32,7 @@ export class ModelInternal {
     public getSegments() : Segment[] {
         return this.segments
         .filter(s =>!s.isBroken())
-        .map((iseg) => new Segment(iseg.endA.position, iseg.endB.position, iseg.material));
+        .map((iseg) => new Segment(iseg.endA.position, iseg.endB.position, iseg.material, (iseg.getLengthRatio() - 1) / iseg.material.maxStretch));
     }
 
     public getScriptedPoints() : Point[] {
@@ -193,7 +193,6 @@ class InternalSegment {
         }
         let springForce = (this.getLengthRatio()-1)*this.material.springCoefficient;
         let dampingForce = this.getLengthVelocity()*this.material.dampingCoefficient*this.initialLength;
-        console.log("spring force: " + springForce + " -- dampingForce: " + dampingForce + " -- y: " + this.endB.position.y);
         return springForce + dampingForce;
     }
 
@@ -201,7 +200,7 @@ class InternalSegment {
         return this.broken;
     }
 
-    private getLengthRatio() : number {
+    public getLengthRatio() : number {
         return this.currentLength() / this.initialLength;
     }
 
