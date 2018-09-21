@@ -41,7 +41,7 @@ export class View {
         this.clear();
         this.drawCurrentSegment();
         this.drawPlacedSegments();
-        this.drawScriptedPoints();
+        this.drawJoints();
         this.drawCursorPosition();
     }
 
@@ -71,6 +71,7 @@ export class View {
 
     drawSegment(segment : Segment) {
       this.ctx.save();
+      this.ctx.lineWidth = 3;
 	  this.ctx.strokeStyle = getColorFromStretch(segment.getStretch());
       this.ctx.beginPath();
       this.ctx.moveTo(segment.a.x, segment.a.y);
@@ -80,16 +81,49 @@ export class View {
       this.ctx.restore();
     }
 
-    drawScriptedPoints() {
-        let pts = this.model.getScriptedPoints();
-        this.ctx.save();
-        this.ctx.fillStyle = "#00ff00";
-        this.ctx.strokeStyle = "#ffffff";
-        for(let p of pts) {
-            this.ctx.strokeRect(p.x -3, p.y -3, 6, 6);
-            this.ctx.fillRect(p.x - 3, p.y -3, 6,6);
+    
+    drawJoints() {
+        let segments = this.model.getSegments();
+        let pointMap = new Map<number, Point>();
+        let scriptedPtMap = new Map<number, Point>();
+        for(let p of this.model.getScriptedPoints()) {
+            scriptedPtMap.set(p.hash(), p);
         }
+        for(let s of segments) {
+            pointMap.set(s.a.hash(), s.a);
+            pointMap.set(s.b.hash(), s.b);
+        }
+        for(let p of pointMap.values()) {
+            if(!scriptedPtMap.has(p.hash())) {
+                this.drawJoint(p);
+            }
+        }
+        for(let p of scriptedPtMap.values()) {
+            this.drawScriptedPoint(p);
+        }
+    }
+    
+    drawJoint(p : Point) {
+        this.ctx.save();
+        this.ctx.lineWidth = 4;
+        this.ctx.fillStyle = "#ffffff";
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.beginPath();
+        this.ctx.ellipse(p.x,p.y,3,3,0,0,360);
+        this.ctx.stroke();
+        this.ctx.fill();
+        this.ctx.closePath();
+        this.ctx.restore();    
+    }
+      
+    drawScriptedPoint(p : Point) {
+        this.ctx.save();
+        this.ctx.fillStyle = "#000000";
+        this.ctx.beginPath();
+        this.ctx.ellipse(p.x,p.y,3,3,0,0,360);
+        this.ctx.stroke();
+        this.ctx.fill();
+        this.ctx.closePath();
         this.ctx.restore();
     }
-
 }
