@@ -5,7 +5,7 @@ import { Vector } from "../Math/Vector.js";
 
 export class ModelInternal {
     private static G = new Vector(0, 1);
-    private timeStep = 0.1;
+    private timeStep = 0.01;
     private segments : InternalSegment[];
     private points : InternalPoint[];
     public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[]) {
@@ -40,8 +40,10 @@ export class ModelInternal {
     }
 
     public step() {
-        let forces = this.calculateForces();
-        this.euler(this.timeStep, forces);
+        for(let i = 0; i < 10; i++) {
+            let forces = this.calculateForces();
+            this.euler(this.timeStep, forces);
+        }
     }
 
     private calculateForces()  {
