@@ -14,5 +14,5 @@ export class Material {
     }
 }
 
-let wood = new Material(0.1, 2000, 0.1);
+let wood = new Material(0.1, 200000, 0.02);
 export {wood};

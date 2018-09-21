@@ -24,10 +24,10 @@ function start() {
 }
 
 function initLevel(controller : Controller) {
-    controller.pushScriptedPoint(basicSineWave(new Point(40,10), new Vector(30,0), 40));
-    controller.pushScriptedPoint(basicSineWave(new Point(360,10), new Vector(30,0), 40));
-    controller.pushSegment(new Point(40,10), new Point(200,40), wood);
-    controller.pushSegment(new Point(360,10), new Point(200,40), wood);
+    controller.pushScriptedPoint(basicSineWave(new Point(40,200), new Vector(30,0), 40));
+    controller.pushScriptedPoint(basicSineWave(new Point(360,200), new Vector(30,0), 40));
+   // controller.pushSegment(new Point(40,10), new Point(200,40), wood);
+   // controller.pushSegment(new Point(360,10), new Point(200,40), wood);
 }
 
 
