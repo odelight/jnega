@@ -35,8 +35,8 @@ export class ModelInternal {
         .map((iseg) => new Segment(iseg.endA.position, iseg.endB.position, iseg.material));
     }
 
-    public getPoints() : Point[] {
-        return this.points.map(p => new Point(p.position.x, p.position.y));
+    public getScriptedPoints() : Point[] {
+        return this.points.filter(pt => pt.scripted).map(p => new Point(p.position.x, p.position.y));
     }
 
     public step() {

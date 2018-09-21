@@ -40,6 +40,7 @@ export class View {
         this.clear();
         this.drawCurrentSegment();
         this.drawPlacedSegments();
+        this.drawScriptedPoints();
         this.drawCursorPosition();
     }
 
@@ -76,6 +77,16 @@ export class View {
       this.ctx.stroke();
 	  this.ctx.closePath();
       this.ctx.restore();
+    }
+
+    drawScriptedPoints() {
+        let pts = this.model.getScriptedPoints();
+        this.ctx.save();
+        this.ctx.fillStyle = "#00ff00";
+        for(let p of pts) {
+            this.ctx.fillRect(p.x - 3, p.y -3, 6,6);
+        }
+        this.ctx.restore();
     }
 
 }
