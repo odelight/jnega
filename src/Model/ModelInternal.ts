@@ -8,12 +8,17 @@ export class ModelInternal {
     private timeStep = 0.01;
     private segments : InternalSegment[];
     private points : InternalPoint[];
-    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[]) {
+    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[], objectiveObject : [Point, number, number][]) {
         this.segments = [];
         this.points = [];
         let vertexSet = new VertexSet();
         for(let p of fixedPoints) {
             vertexSet.addScriptedPoint(p);
+        }
+        for(let obj of objectiveObject) {
+            vertexSet.addObjectivePoint(obj[0], obj[1], obj[2]);
+            let pt = vertexSet.getInternalPoint(obj[0]);
+            pt.m += obj[1];
         }
         for (let seg of segments) {
             let m = seg.material.density * seg.length();
@@ -36,7 +41,17 @@ export class ModelInternal {
     }
 
     public getScriptedPoints() : Point[] {
-        return this.points.filter(pt => pt.scripted).map(p => new Point(p.position.x, p.position.y));
+        return this.points.filter(pt => pt.type == PointType.SCRIPTED).map(p => new Point(p.position.x, p.position.y));
+    }
+
+    public getObjectivePoints(): [Point, number, number][] {
+        let result : [Point, number, number][]= [];
+        for(let ip of this.points) {
+            if(ip.type == PointType.OBJECTIVE) {
+                result.push([new Point(ip.position.x, ip.position.y), ip.m, ip.id]);
+            }
+        }
+        return result;
     }
 
     public step() {
@@ -77,7 +92,7 @@ class ForceMap {
     }
 
     public addForce(p : InternalPoint, v : Vector) {
-        if(p.scripted) {
+        if(p.type == PointType.SCRIPTED) {
             return;
         }
         let f = this.innerMap.get(p.id);
@@ -110,6 +125,11 @@ class VertexSet {
         this.innerMap.set(p(0).hash(), ip);
     }
 
+    addObjectivePoint(p : Point, m : number, id : number) {
+        let ip = new ObjectivePoint(p, m, id);
+        this.innerMap.set(p.hash(), ip);
+    }
+
     getInternalPoint(p : Point) : InternalPoint {
         let ip = this.innerMap.get(p.hash())
         if(ip != null) {
@@ -124,6 +144,12 @@ class VertexSet {
     getAllPoints() : InternalPoint[] {
         return Array.from(this.innerMap.values());
     }
+}
+
+enum PointType {
+    SCRIPTED,
+    DYNAMIC,
+    OBJECTIVE
 }
 
 //internal point representation
@@ -142,8 +168,8 @@ class InternalPoint {
         this.id = InternalPoint.nextId++;
     }
     
-    get scripted() {
-        return false;
+    get type() : PointType {
+        return PointType.DYNAMIC;
     }
 
     step(dt : number, f: Vector = new Vector(0,0)) {
@@ -151,6 +177,18 @@ class InternalPoint {
         this.position = this.position.offsetBy(this.v.scalarProduct(dt));
     }
 
+}
+
+class ObjectivePoint extends InternalPoint {
+    id : number;
+    constructor(p : Point, m : number, id : number) {
+        super(p);
+        this.m = m;
+        this.id = id;
+    }
+    get type() {
+        return PointType.OBJECTIVE;
+    }
 }
 
 class ScriptedPoint extends InternalPoint {
@@ -167,8 +205,8 @@ class ScriptedPoint extends InternalPoint {
         this.position = this.path(this.t);
     }
 
-    get scripted() {
-        return true;
+    get type() {
+        return PointType.SCRIPTED;
     }
 }
 

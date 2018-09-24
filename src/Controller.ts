@@ -45,6 +45,12 @@ export class Controller{
         this.model.pushScriptedPoint(path);
     }
 
+    pushObjectivePoint(position : Point, mass : number, id : number) {
+        this.addPointToMap(position);
+        this.model.pushObjectivePoint(position, mass, id);
+    }
+
+
     pushSegment(a : Point, b : Point, material : Material) {
         this.addPointToMap(a);
         this.addPointToMap(b);
