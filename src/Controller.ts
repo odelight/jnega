@@ -52,6 +52,10 @@ export class Controller{
 
 
     pushSegment(a : Point, b : Point, material : Material) {
+        if(a.equals(b)) {
+            //Don't create segments of length zero
+            return;
+        }
         this.addPointToMap(a);
         this.addPointToMap(b);
         this.model.pushSegment(a, b, material);
@@ -74,10 +78,9 @@ export class Controller{
         if(this.lineStart == null) {
             this.lineStart = point;
         } else {
-            this.model.pushSegment(this.lineStart, point, wood);
+            this.pushSegment(this.lineStart, point, wood);
             this.lineStart = null;
         }
-        this.addPointToMap(point);
     }
 
     private snapPoint(point : Point) : Point {
