@@ -1,5 +1,5 @@
 import { Point } from "../Model/Point.js";
-import { ModelAPI } from "../Model/ModelAPI.js";
+import { ModelAPI, GameState } from "../Model/ModelAPI.js";
 import { Segment } from "../Model/Segment.js";
 import { Material, wood } from "../Model/Material.js";
 import { getColorFromStretch } from "./SegmentColor.js";
@@ -41,8 +41,23 @@ export class View {
         this.clear();
         this.drawCurrentSegment();
         this.drawPlacedSegments();
-        this.drawJoints();
+        this.drawPoints();
         this.drawCursorPosition();
+        this.checkGameState();
+    }
+    private hasAlerted = false;
+    checkGameState() {
+        if(this.hasAlerted) {
+            return;
+        }
+        let gameState = this.model.getGameOver();
+        if(gameState == GameState.WON) {
+            alert("You won!");
+            this.hasAlerted = true;
+        } else if (gameState == GameState.LOST) {
+            alert("You lost!");
+            this.hasAlerted = true;
+        }
     }
 
     clear() {
@@ -82,7 +97,7 @@ export class View {
     }
 
     
-    drawJoints() {
+    drawPoints() {
         let segments = this.model.getSegments();
         let pointMap = new Map<number, Point>();
         let scriptedPtMap = new Map<number, Point>();
@@ -101,6 +116,7 @@ export class View {
         for(let p of scriptedPtMap.values()) {
             this.drawScriptedPoint(p);
         }
+        this.drawMassivePoints();
     }
     
     drawJoint(p : Point) {
@@ -125,5 +141,21 @@ export class View {
         this.ctx.fill();
         this.ctx.closePath();
         this.ctx.restore();
+    }
+    drawMassivePoints() {
+        for(let obj of this.model.getObjectivePoints()) {
+            this.drawMassivePoint(obj[0]);
+        }
+    }
+    drawMassivePoint(p : Point) {
+        this.ctx.save();
+        this.ctx.fillStyle = "#ff00ff";
+        this.ctx.beginPath();
+        this.ctx.ellipse(p.x,p.y,6,6,0,0,360);
+        this.ctx.stroke();
+        this.ctx.fill();
+        this.ctx.closePath();
+        this.ctx.restore();
+
     }
 }
