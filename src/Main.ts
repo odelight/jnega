@@ -26,7 +26,8 @@ function start() {
 function initLevel(controller : Controller) {
     controller.pushScriptedPoint(basicCosineWave(new Point(40,200), new Vector(30,0), 40));
     controller.pushScriptedPoint(basicCosineWave(new Point(360,200), new Vector(30,0), 40));
-    controller.pushObjectivePoint(new Point(200, 300), 2000, 1);
+    controller.pushObjectivePoint(new Point(200, 300), 400, 1);
+    model.setBudget(1000);
     //Lose if the massive object drops off screen
     model.addLossCondition(model => 
         model.getObjectivePoints()

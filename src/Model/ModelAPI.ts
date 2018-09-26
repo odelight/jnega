@@ -13,6 +13,7 @@ export class ModelAPI {
     private internalModel : PhysicsModel | null = null;
     private running : boolean = false;
     private time : number;
+    private budget: number = 0;
 
     constructor() {
         this.scriptedPoints = []
@@ -22,9 +23,10 @@ export class ModelAPI {
         this.victoryConditions = [];
     }
 
-    pushSegment(a : Point, b : Point, material : Material) {
+    pushSegment(segment : Segment) {
         if(!this.running || this.internalModel == null) {
-            this.segments.push(new Segment(a,b, material));
+            this.segments.push(segment);
+            this.budget -= segment.cost();
         } else {
             throw "Attempted to add segment after simulation started";
         }
@@ -96,6 +98,14 @@ export class ModelAPI {
         }
 
         return GameState.STILL_PLAYING;
+    }
+
+    setBudget(budget : number) {
+        this.budget = budget;
+    }
+
+    getRemainingBudget() {
+        return this.budget;
     }
 
     start() {

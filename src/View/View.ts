@@ -44,6 +44,7 @@ export class View {
         this.drawPoints();
         this.drawCursorPosition();
         this.checkGameState();
+        this.drawBudget();
     }
     private hasAlerted = false;
     checkGameState() {
@@ -76,7 +77,9 @@ export class View {
         if(this.lineStart == null || this.cursorPosition == null) {
             return;
         }
-        this.drawSegment(new Segment(this.lineStart, this.cursorPosition, wood))
+        let segment = new Segment(this.lineStart, this.cursorPosition, wood);
+        let color = (segment.cost() > this.model.getRemainingBudget()) ? "#ff0000" : null;
+        this.drawSegment(segment, color);
     }
 
     drawPlacedSegments() {
@@ -84,10 +87,14 @@ export class View {
         segments.forEach((s) => this.drawSegment(s));
     }
 
-    drawSegment(segment : Segment) {
+    drawSegment(segment : Segment, colorOverride : string | null = null) {
       this.ctx.save();
       this.ctx.lineWidth = 3;
-	  this.ctx.strokeStyle = getColorFromStretch(segment.getStretch());
+      if(colorOverride == null) {
+        this.ctx.strokeStyle = getColorFromStretch(segment.getStretch());
+      } else {
+          this.ctx.strokeStyle = colorOverride;
+      }
       this.ctx.beginPath();
       this.ctx.moveTo(segment.a.x, segment.a.y);
       this.ctx.lineTo(segment.b.x, segment.b.y);
@@ -156,6 +163,9 @@ export class View {
         this.ctx.fill();
         this.ctx.closePath();
         this.ctx.restore();
-
+    }
+    drawBudget() {
+        let budget = this.model.getRemainingBudget();
+        this.ctx.fillText("$" + budget.toFixed(0), 10, 10);
     }
 }
