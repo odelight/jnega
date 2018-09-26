@@ -2,13 +2,14 @@ import { Point } from "./Point.js";
 import { Segment } from "./Segment.js";
 import { Material } from "./Material.js";
 import { Vector } from "../Math/Vector.js";
+import { Path } from "../Math/Path.js";
 
-export class ModelInternal {
+export class PhysicsModel {
     private static G = new Vector(0, 1);
     private timeStep = 0.01;
     private segments : InternalSegment[];
     private points : InternalPoint[];
-    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[], objectiveObject : [Point, number, number][]) {
+    public constructor(segments : Segment[], fixedPoints : Path[], objectiveObject : {position: Point, mass: number, id: number}[]) {
         this.segments = [];
         this.points = [];
         let vertexSet = new VertexSet();
@@ -16,9 +17,9 @@ export class ModelInternal {
             vertexSet.addScriptedPoint(p);
         }
         for(let obj of objectiveObject) {
-            vertexSet.addObjectivePoint(obj[0], obj[1], obj[2]);
-            let pt = vertexSet.getInternalPoint(obj[0]);
-            pt.m += obj[1];
+            vertexSet.addObjectivePoint(obj.position, obj.mass, obj.id);
+            let pt = vertexSet.getInternalPoint(obj.position);
+            pt.m += obj.mass;
         }
         for (let seg of segments) {
             let m = seg.material.density * seg.length();
@@ -44,11 +45,11 @@ export class ModelInternal {
         return this.points.filter(pt => pt.type == PointType.SCRIPTED).map(p => new Point(p.position.x, p.position.y));
     }
 
-    public getObjectivePoints(): [Point, number, number][] {
-        let result : [Point, number, number][]= [];
+    public getObjectivePoints():{position: Point, mass: number, id: number}[] {
+        let result : {position: Point, mass: number, id: number}[]= [];
         for(let ip of this.points) {
             if(ip.type == PointType.OBJECTIVE) {
-                result.push([new Point(ip.position.x, ip.position.y), ip.m, ip.id]);
+                result.push({position: new Point(ip.position.x, ip.position.y), mass: ip.m, id:  ip.id});
             }
         }
         return result;
@@ -70,7 +71,7 @@ export class ModelInternal {
             forceMap.addForce(s.endB, segmentDirection.scalarProduct(-t));
         }
         for(let p of this.points) {
-            forceMap.addForce(p, ModelInternal.G.scalarProduct(p.m));
+            forceMap.addForce(p, PhysicsModel.G.scalarProduct(p.m));
         }
         return forceMap;
     } 
@@ -120,9 +121,9 @@ class VertexSet {
         this.innerMap = new Map();
     }
 
-    addScriptedPoint(p : (t : number) => Point) {
+    addScriptedPoint(p : Path) {
         let ip = new ScriptedPoint(p);
-        this.innerMap.set(p(0).hash(), ip);
+        this.innerMap.set(p.initialPosition().hash(), ip);
     }
 
     addObjectivePoint(p : Point, m : number, id : number) {
@@ -193,16 +194,16 @@ class ObjectivePoint extends InternalPoint {
 
 class ScriptedPoint extends InternalPoint {
     private t : number;
-    private path : (t : number) => Point
-    constructor(path : (t : number) => Point) {
-        super(path(0));
+    private path : Path
+    constructor(path : Path) {
+        super(path.initialPosition());
         this.path = path;
         this.t = 0;
     }
 
     step(dt : number, f: Vector = new Vector(0,0)) {
         this.t += dt;
-        this.position = this.path(this.t);
+        this.position = this.path.atTime(this.t);
     }
 
     get type() {

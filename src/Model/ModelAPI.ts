@@ -1,15 +1,16 @@
 import { Point } from "./Point.js";
 import { Segment } from "./Segment.js";
 import { Material } from "./Material.js";
-import { ModelInternal } from "./ModelInternal.js";
+import { PhysicsModel } from "./PhysicsModel.js";
+import { Path } from "../Math/Path.js";
 
 export class ModelAPI {
     private segments : Segment[];
-    private scriptedPoints : ((t : number) => Point)[];
-    private objectivePoints : [Point, number,  number][];
+    private scriptedPoints : Path[];
+    private objectivePoints : {position: Point, mass: number, id: number}[];
     private lossConditions : ((model : ModelAPI) => boolean)[];
     private victoryConditions : ((model : ModelAPI) => boolean)[];
-    private internalModel : ModelInternal | null = null;
+    private internalModel : PhysicsModel | null = null;
     private running : boolean = false;
     private time : number;
 
@@ -37,13 +38,13 @@ export class ModelAPI {
         }
     }
 
-    pushScriptedPoint(path : (t : number) => Point) {
+    pushScriptedPoint(path : Path) {
         this.scriptedPoints.push(path);
     }
 
     getScriptedPoints() : Point[] {
         if(!this.running || this.internalModel == null) {
-            return this.scriptedPoints.map(sp => sp(0));
+            return this.scriptedPoints.map(sp => sp.initialPosition());
         } else {
             return this.internalModel.getScriptedPoints();
         }    
@@ -51,13 +52,13 @@ export class ModelAPI {
 
     pushObjectivePoint(position : Point, mass : number, id : number) {
         if(!this.running || this.internalModel == null) {
-            this.objectivePoints.push([position, mass, id]);
+            this.objectivePoints.push({position: position, mass: mass, id: id});
         } else {
             throw "Attempted to add objective point after simulation started";
         }    
     }
 
-    getObjectivePoints() : [Point, number, number][] {
+    getObjectivePoints() : {position: Point, mass: number, id: number}[] {
         if(!this.running || this.internalModel == null) {
             return this.objectivePoints;
         } else {
@@ -100,7 +101,7 @@ export class ModelAPI {
     start() {
         this.time = 0;
         this.running = true;
-        this.internalModel = new ModelInternal(this.segments, this.scriptedPoints, this.objectivePoints);
+        this.internalModel = new PhysicsModel(this.segments, this.scriptedPoints, this.objectivePoints);
     }
 
     abort() {

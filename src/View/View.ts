@@ -144,7 +144,7 @@ export class View {
     }
     drawMassivePoints() {
         for(let obj of this.model.getObjectivePoints()) {
-            this.drawMassivePoint(obj[0]);
+            this.drawMassivePoint(obj.position);
         }
     }
     drawMassivePoint(p : Point) {

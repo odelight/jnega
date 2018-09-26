@@ -6,7 +6,7 @@ import { Point } from "./Model/Point.js";
 import { Segment } from "./Model/Segment.js";
 import { wood } from "./Model/Material.js";
 import { Vector } from "./Math/Vector.js";
-import { basicCosineWave } from "./Math/Paths.js";
+import { basicCosineWave } from "./Math/Path.js";
 
 let canvas : HTMLCanvasElement = Util.checkType(document.getElementById("gameCanvas"), HTMLCanvasElement);
 let controller : Controller;
@@ -30,8 +30,8 @@ function initLevel(controller : Controller) {
     //Lose if the massive object drops off screen
     model.addLossCondition(model => 
         model.getObjectivePoints()
-        .filter(obj => obj[2] == 1)
-        .some(obj => obj[0].y > 400));
+        .filter(objectivePoint => objectivePoint.id == 1)
+        .some(objectivePoint => objectivePoint.position.y > 400));
     //Win after 5 seconds
     model.addVictoryCondition(model =>
         model.getTime() > 500

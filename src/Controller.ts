@@ -3,6 +3,7 @@ import { View } from "./View/View.js";
 import { ModelAPI } from "./Model/ModelAPI.js";
 import { wood } from "./Model/Material.js";
 import { Material } from "./Model/Material.js";
+import { Path } from "./Math/Path.js";
 
 const MAP_WIDTH = 400;
 const MAP_HEIGHT = 400;
@@ -40,8 +41,8 @@ export class Controller{
         return Controller.instance;
     }
 
-    pushScriptedPoint(path : (t : number) => Point) {
-        this.addPointToMap(path(0));
+    pushScriptedPoint(path : Path) {
+        this.addPointToMap(path.initialPosition());
         this.model.pushScriptedPoint(path);
     }
 
