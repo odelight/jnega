@@ -6,7 +6,7 @@ import { ModelInternal } from "./ModelInternal.js";
 export class ModelAPI {
     private segments : Segment[];
     private scriptedPoints : ((t : number) => Point)[];
-    private objectivePoints : [Point, number,  number][];
+    private objectivePoints : {position: Point, mass: number, id: number}[];
     private lossConditions : ((model : ModelAPI) => boolean)[];
     private victoryConditions : ((model : ModelAPI) => boolean)[];
     private internalModel : ModelInternal | null = null;
@@ -51,13 +51,13 @@ export class ModelAPI {
 
     pushObjectivePoint(position : Point, mass : number, id : number) {
         if(!this.running || this.internalModel == null) {
-            this.objectivePoints.push([position, mass, id]);
+            this.objectivePoints.push({position: position, mass: mass, id: id});
         } else {
             throw "Attempted to add objective point after simulation started";
         }    
     }
 
-    getObjectivePoints() : [Point, number, number][] {
+    getObjectivePoints() : {position: Point, mass: number, id: number}[] {
         if(!this.running || this.internalModel == null) {
             return this.objectivePoints;
         } else {

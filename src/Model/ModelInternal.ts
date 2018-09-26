@@ -8,7 +8,7 @@ export class ModelInternal {
     private timeStep = 0.01;
     private segments : InternalSegment[];
     private points : InternalPoint[];
-    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[], objectiveObject : [Point, number, number][]) {
+    public constructor(segments : Segment[], fixedPoints : ((t : number) => Point)[], objectiveObject : {position: Point, mass: number, id: number}[]) {
         this.segments = [];
         this.points = [];
         let vertexSet = new VertexSet();
@@ -16,9 +16,9 @@ export class ModelInternal {
             vertexSet.addScriptedPoint(p);
         }
         for(let obj of objectiveObject) {
-            vertexSet.addObjectivePoint(obj[0], obj[1], obj[2]);
-            let pt = vertexSet.getInternalPoint(obj[0]);
-            pt.m += obj[1];
+            vertexSet.addObjectivePoint(obj.position, obj.mass, obj.id);
+            let pt = vertexSet.getInternalPoint(obj.position);
+            pt.m += obj.mass;
         }
         for (let seg of segments) {
             let m = seg.material.density * seg.length();
@@ -44,11 +44,11 @@ export class ModelInternal {
         return this.points.filter(pt => pt.type == PointType.SCRIPTED).map(p => new Point(p.position.x, p.position.y));
     }
 
-    public getObjectivePoints(): [Point, number, number][] {
-        let result : [Point, number, number][]= [];
+    public getObjectivePoints():{position: Point, mass: number, id: number}[] {
+        let result : {position: Point, mass: number, id: number}[]= [];
         for(let ip of this.points) {
             if(ip.type == PointType.OBJECTIVE) {
-                result.push([new Point(ip.position.x, ip.position.y), ip.m, ip.id]);
+                result.push({position: new Point(ip.position.x, ip.position.y), mass: ip.m, id:  ip.id});
             }
         }
         return result;
