@@ -25,4 +25,8 @@ export class Segment {
     length() : number {
         return this.a.distanceTo(this.b);
     }
+
+    cost() : number {
+        return this.length()*this.material.costPerUnit;
+    }
 }

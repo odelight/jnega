@@ -4,6 +4,7 @@ import { ModelAPI } from "./Model/ModelAPI.js";
 import { wood } from "./Model/Material.js";
 import { Material } from "./Model/Material.js";
 import { Path } from "./Math/Path.js";
+import { Segment } from "./Model/Segment.js";
 
 const MAP_WIDTH = 400;
 const MAP_HEIGHT = 400;
@@ -52,14 +53,14 @@ export class Controller{
     }
 
 
-    pushSegment(a : Point, b : Point, material : Material) {
-        if(a.equals(b)) {
+    pushSegment(segment : Segment) {
+        if(segment.length() == 0) {
             //Don't create segments of length zero
             return;
         }
-        this.addPointToMap(a);
-        this.addPointToMap(b);
-        this.model.pushSegment(a, b, material);
+        this.addPointToMap(segment.a);
+        this.addPointToMap(segment.b);
+        this.model.pushSegment(segment);
     }
 
 
@@ -79,7 +80,12 @@ export class Controller{
         if(this.lineStart == null) {
             this.lineStart = point;
         } else {
-            this.pushSegment(this.lineStart, point, wood);
+            let segment = new Segment(this.lineStart, point, wood);
+            if(segment.cost() > this.model.getRemainingBudget()) {
+                alert("Can't afford to place segment!");
+                return;
+            }
+            this.pushSegment(segment);
             this.lineStart = null;
         }
     }
