@@ -10,22 +10,24 @@ import { ControlScheme } from "./Controller.js";
 
 const SNAP_RADIUS = 20;
 
-export class BuildingScheme implements ControlScheme {
-    private static instance : BuildingScheme;
+export class PlacingControls implements ControlScheme {
+    private static instance : PlacingControls;
     private model : ModelAPI;
     private view : View;
     private lineStart : Point | null;
     private pointMap : Point[][] | null[][];
+    public selectedMaterial: Material;
     
     constructor(model: ModelAPI, view : View) {
-        if (!BuildingScheme.instance) {
-            BuildingScheme.instance = this;
+        if (!PlacingControls.instance) {
+            PlacingControls.instance = this;
             this.model = model;
             this.view = view;
             this.initPointMap();
+            this.selectedMaterial = wood;
         }
         else {
-            throw "BuildingScheme constructed outside of Controller.";
+            throw "PlacingControls constructed outside of Controller.";
         }
     }
 
@@ -67,7 +69,7 @@ export class BuildingScheme implements ControlScheme {
         if(this.lineStart == null) {
             this.lineStart = point;
         } else {
-            let segment = new Segment(this.lineStart, point, wood);
+            let segment = new Segment(this.lineStart, point, this.selectedMaterial);
             if(segment.cost() > this.model.getRemainingBudget()) {
                 alert("Can't afford to place segment!");
                 return;

@@ -1,12 +1,10 @@
 import { Point } from "../Model/Point.js";
 import { View } from "../View/View.js";
 import { ModelAPI } from "../Model/ModelAPI.js";
-import { wood } from "../Model/Material.js";
-import { Material } from "../Model/Material.js";
 import { Path } from "../Math/Path.js";
 import { Segment } from "../Model/Segment.js";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../Main.js";
-import { BuildingScheme } from "./BuildingScheme.js";
+import { LevelControls } from "./LevelControls.js";
 
 export interface ControlScheme {
     handleMouseClick(event : MouseEvent) : void;
@@ -20,14 +18,14 @@ export class Controller {
     private static instance : Controller;
     private model : ModelAPI;
     private view : View;
-    private activeScheme : ControlScheme;
-    private buildingScheme : BuildingScheme;
+    private activeControls : ControlScheme;
+    private levelControls : LevelControls;
     
     private constructor(canvas : HTMLCanvasElement, model: ModelAPI, view : View) {
         this.model = model;
         this.view = view;
-        this.buildingScheme = new BuildingScheme(model, view);
-        this.activeScheme = this.buildingScheme;
+        this.levelControls = new LevelControls(model, view);
+        this.activeControls = this.levelControls;
 
         canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
         canvas.addEventListener('click', (event) => this.onMouseClick(event));
@@ -50,15 +48,15 @@ export class Controller {
     }
 
     pushScriptedPoint(path : Path) {
-        this.buildingScheme.pushScriptedPoint(path);
+        this.levelControls.pushScriptedPoint(path);
     }
 
     pushObjectivePoint(position : Point, mass : number, id : number) {
-        this.buildingScheme.pushObjectivePoint(position, mass, id);
+        this.levelControls.pushObjectivePoint(position, mass, id);
     }
 
     pushSegment(segment : Segment) {
-        this.buildingScheme.pushSegment(segment);
+        this.levelControls.pushSegment(segment);
     }
 
 
@@ -77,18 +75,18 @@ export class Controller {
         if (this.isOutsideCanvas(event.offsetX, event.offsetY))
             return;
 
-        this.activeScheme.handleMouseClick(event);
+        this.activeControls.handleMouseClick(event);
     }
 
     onMouseMove(event : MouseEvent) {
         if (this.isOutsideCanvas(event.offsetX, event.offsetY))
             return;
 
-        this.activeScheme.handleMouseMove(event);
+        this.activeControls.handleMouseMove(event);
     }
 
     onKeyPress(event : KeyboardEvent) {
-        this.activeScheme.handleKeyPress(event);
+        this.activeControls.handleKeyPress(event);
     }
 
 

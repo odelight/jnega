@@ -3,6 +3,7 @@ import { ModelAPI, GameState } from "../Model/ModelAPI.js";
 import { Segment } from "../Model/Segment.js";
 import { Material, wood } from "../Model/Material.js";
 import { getColorFromStretch } from "./SegmentColor.js";
+import { Toolbar, Button } from "../Controller/Toolbar.js";
 
 export class View {
     private model : ModelAPI;
@@ -11,6 +12,7 @@ export class View {
     private ctx : CanvasRenderingContext2D;
     private cursorImage : ImageData;
     private cursorSize : number;
+    private toolbar : Toolbar;
 
     constructor(ctx : CanvasRenderingContext2D, model : ModelAPI) {
         this.ctx = ctx;
@@ -27,6 +29,10 @@ export class View {
             this.cursorImage.data[i+2] = 0xFF;
             this.cursorImage.data[i+3] = 0xFF;
         }
+    }
+
+    setToolbarReference(toolbar : Toolbar) {
+        this.toolbar = toolbar;
     }
     
     setLineStart(point : Point | null) {
@@ -45,6 +51,7 @@ export class View {
         this.drawCursorPosition();
         this.checkGameState();
         this.drawBudget();
+        this.drawToolbar();
     }
     private hasAlerted = false;
     checkGameState() {
@@ -167,5 +174,13 @@ export class View {
     drawBudget() {
         let budget = this.model.getRemainingBudget();
         this.ctx.fillText("$" + budget.toFixed(0), 10, 10);
+    }
+
+    private drawToolbar() {
+        this.toolbar.buttons.forEach((btn) => this.drawButton(btn));
+    }
+
+    private drawButton(button : Button) {
+        this.ctx.drawImage(button.image, button.xPos, button.yPos);
     }
 }
