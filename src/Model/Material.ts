@@ -17,4 +17,6 @@ export class Material {
 }
 
 let wood = new Material(0.1, 200000, 0.02, 1);
-export {wood};
+let steel = new Material(0.2, 2000000, 0.01, 2);
+
+export {wood, steel};
