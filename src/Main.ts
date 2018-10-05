@@ -1,5 +1,5 @@
 import { Util } from "./Util.js";
-import { Controller} from "./Controller.js";
+import { Controller} from "./Controller/Controller.js";
 import { View } from "./View/View.js";
 import { ModelAPI } from "./Model/ModelAPI.js";
 import { Point } from "./Model/Point.js";
@@ -13,6 +13,9 @@ let controller : Controller;
 let view : View;
 let model : ModelAPI;
 let time = 0;
+export const CANVAS_HEIGHT = canvas.scrollHeight;
+export const CANVAS_WIDTH = canvas.scrollWidth;
+
 start();
 
 function start() {

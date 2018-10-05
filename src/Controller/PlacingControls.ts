@@ -1,45 +1,34 @@
-import { Point } from "./Model/Point.js";
-import { View } from "./View/View.js";
-import { ModelAPI } from "./Model/ModelAPI.js";
-import { wood } from "./Model/Material.js";
-import { Material } from "./Model/Material.js";
-import { Path } from "./Math/Path.js";
-import { Segment } from "./Model/Segment.js";
+import { Point } from "../Model/Point.js";
+import { View } from "../View/View.js";
+import { ModelAPI } from "../Model/ModelAPI.js";
+import { wood } from "../Model/Material.js";
+import { Material } from "../Model/Material.js";
+import { Path } from "../Math/Path.js";
+import { Segment } from "../Model/Segment.js";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../Main.js";
+import { ControlScheme } from "./Controller.js";
 
-const MAP_WIDTH = 400;
-const MAP_HEIGHT = 400;
-const SNAP_RADIUS = 10;
+const SNAP_RADIUS = 20;
 
-export class Controller{
-    private static instance : Controller;
+export class PlacingControls implements ControlScheme {
+    private static instance : PlacingControls;
     private model : ModelAPI;
     private view : View;
     private lineStart : Point | null;
     private pointMap : Point[][] | null[][];
+    public selectedMaterial: Material;
     
-    private constructor(canvas : HTMLCanvasElement, model: ModelAPI, view : View) {
-        this.model = model;
-        this.view = view;
-        this.initPointMap();
-
-        canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
-        canvas.addEventListener('click', (event) => this.onMouseClick(event));
-        document.addEventListener('keydown', (event) => this.onKeyPress(event));
-
-
-        canvas.addEventListener('touchstart', (event) => this.onScreenTouch(event));
-        canvas.addEventListener('touchmove', (event) => this.onTouchMove(event));
-    }
-
-    static getInstance(canvas ?: HTMLCanvasElement, model ?: ModelAPI, view ?: View) : Controller {
-        if (!Controller.instance) {
-            if (canvas == undefined || model == undefined || view == undefined)
-                console.error("Controller must be initialized by passing a canvas, model, and view to getInstance.");
-            else
-                Controller.instance = new Controller(canvas, model, view);
+    constructor(model: ModelAPI, view : View) {
+        if (!PlacingControls.instance) {
+            PlacingControls.instance = this;
+            this.model = model;
+            this.view = view;
+            this.initPointMap();
+            this.selectedMaterial = wood;
         }
-
-        return Controller.instance;
+        else {
+            throw "PlacingControls constructed outside of Controller.";
+        }
     }
 
     pushScriptedPoint(path : Path) {
@@ -52,7 +41,6 @@ export class Controller{
         this.model.pushObjectivePoint(position, mass, id);
     }
 
-
     pushSegment(segment : Segment) {
         if(segment.length() == 0) {
             //Don't create segments of length zero
@@ -62,6 +50,7 @@ export class Controller{
         this.addPointToMap(segment.b);
         this.model.pushSegment(segment);
     }
+
 
 
     // =========
@@ -80,7 +69,7 @@ export class Controller{
         if(this.lineStart == null) {
             this.lineStart = point;
         } else {
-            let segment = new Segment(this.lineStart, point, wood);
+            let segment = new Segment(this.lineStart, point, this.selectedMaterial);
             if(segment.cost() > this.model.getRemainingBudget()) {
                 alert("Can't afford to place segment!");
                 return;
@@ -98,10 +87,10 @@ export class Controller{
     }
 
     private initPointMap() {
-        this.pointMap = new Array(MAP_WIDTH);
-        for (let i : number = 0; i < MAP_WIDTH; i++) {
-            this.pointMap[i] = new Array(MAP_HEIGHT);
-            for (let j: number = 0; j < MAP_HEIGHT; j++) {
+        this.pointMap = new Array(CANVAS_WIDTH);
+        for (let i : number = 0; i < CANVAS_WIDTH; i++) {
+            this.pointMap[i] = new Array(CANVAS_HEIGHT);
+            for (let j: number = 0; j < CANVAS_HEIGHT; j++) {
                 this.pointMap[i][j] = null;
             }
         }
@@ -110,10 +99,10 @@ export class Controller{
     private addPointToMap(point : Point) {
         for (let i = -SNAP_RADIUS; i <= SNAP_RADIUS; i++) {
             let loc_i = point.x + i;
-            if (loc_i >= 0 && loc_i < MAP_WIDTH) {
+            if (loc_i >= 0 && loc_i < CANVAS_WIDTH) {
                 for (let j = -(SNAP_RADIUS - Math.abs(i)); j <= SNAP_RADIUS - Math.abs(i); j++) {
                     let loc_j = point.y + j;
-                    if (loc_j >= 0 && loc_j < MAP_HEIGHT) {
+                    if (loc_j >= 0 && loc_j < CANVAS_HEIGHT) {
                         if (this.pointMap[loc_i][loc_j] == null) {
                             this.pointMap[loc_i][loc_j] = point;
                         } else if (this.calculateDistance(new Point(loc_i, loc_j), point) < this.calculateDistance(new Point(loc_i, loc_j), <Point>this.pointMap[loc_i][loc_j])) {
@@ -129,32 +118,22 @@ export class Controller{
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
-    private isOutsideCanvas(x : number, y : number) : boolean {
-        return x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT;
-    }
-
 
 
     // ==================
     // * EVENT HANDLERS *
     // ==================
 
-    onMouseClick(event : MouseEvent) {
-        if (this.isOutsideCanvas(event.offsetX, event.offsetY))
-            return;
-
+    handleMouseClick(event : MouseEvent) {
         this.placePoint(this.snapPoint(new Point(event.offsetX, event.offsetY)));
         this.view.setLineStart(this.lineStart);
     }
 
-    onMouseMove(event : MouseEvent) {
-        if (this.isOutsideCanvas(event.offsetX, event.offsetY))
-            return;
-
+    handleMouseMove(event : MouseEvent) {
         this.view.setCursorPosition(this.snapPoint(new Point(event.offsetX, event.offsetY)));
     }
 
-    onKeyPress(event : KeyboardEvent) {
+    handleKeyPress(event : KeyboardEvent) {
         if (event.code == "KeyS") {
             this.clearPoint();
             if(this.model.isRunning()) {
@@ -173,11 +152,11 @@ export class Controller{
 
 
 
-    onScreenTouch(event : TouchEvent) {
+    handleScreenTouch(event : TouchEvent) {
         //handle screen touch event;
     }
 
-    onTouchMove(event : TouchEvent) {
+    handleTouchMove(event : TouchEvent) {
        // handle screen touch movement event;
     }
 
