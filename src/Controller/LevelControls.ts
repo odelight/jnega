@@ -60,36 +60,8 @@ export class LevelControls implements ControlScheme {
     // * EVENT HANDLERS *
     // ==================
 
-    private isInsideToolbar(x : number, y : number) : boolean {
-        if (this.toolbar.bIsHorizontal) {
-            if (this.toolbar.bIsTopOrLeft) {
-                if (y < this.toolbar.buttonSize) {
-                    return true;
-                }
-            } else {
-                if (y > CANVAS_HEIGHT - this.toolbar.buttonSize) {
-                    return true;
-                }
-            }
-        } else {
-            if (this.toolbar.bIsTopOrLeft) {
-                if (x < this.toolbar.buttonSize) {
-                    return true;
-                }
-            } else {
-                if (x > CANVAS_WIDTH - this.toolbar.buttonSize) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-
     handleMouseClick(event : MouseEvent) {
-        if (this.isInsideToolbar(event.offsetX, event.offsetY)) {
+        if (this.toolbar.isInsideToolbar(event.offsetX, event.offsetY)) {
             this.toolbar.buttons.forEach((button) => button.handleMouseClick(event));
         } else {
             this.activeControls.handleMouseClick(event);

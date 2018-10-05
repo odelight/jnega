@@ -161,4 +161,30 @@ export class Toolbar {
     clearToolbar() {
         this._buttons.length = 0;
     }
+
+    isInsideToolbar(x : number, y : number) : boolean {
+        if (this._bIsHorizontal) {
+            if (this._bIsTopOrLeft) {
+                if (y < this.buttonSize) {
+                    return true;
+                }
+            } else {
+                if (y > CANVAS_HEIGHT - this.buttonSize) {
+                    return true;
+                }
+            }
+        } else {
+            if (this._bIsTopOrLeft) {
+                if (x < this.buttonSize) {
+                    return true;
+                }
+            } else {
+                if (x > CANVAS_WIDTH - this.buttonSize) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
