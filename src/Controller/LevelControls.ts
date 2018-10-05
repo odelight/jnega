@@ -4,7 +4,6 @@ import { ModelAPI } from "../Model/ModelAPI.js";
 import { wood } from "../Model/Material.js";
 import { Path } from "../Math/Path.js";
 import { Segment } from "../Model/Segment.js";
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../Main.js";
 import { ControlScheme } from "./Controller.js";
 import { PlacingControls } from "./PlacingControls.js";
 import { Toolbar, Button } from "./Toolbar.js";
@@ -36,8 +35,6 @@ export class LevelControls implements ControlScheme {
         this.toolbar = new Toolbar();
         this.toolbar.addButton(new woodButton(this.placingControls, "Digit1"));
         this.toolbar.addButton(new steelButton(this.placingControls, "Escape"));
-        this.toolbar.addButton(new changeSidesButton("Digit3"));
-        this.toolbar.addButton(new changeOrientationButton("Digit4"));
     }
 
 
@@ -120,27 +117,5 @@ class steelButton extends Button {
     handlePress() : void {
         this.placingControls.selectedMaterial = wood;
         console.warn("Pressed steelButton! WOOD selected though.");
-    }
-}
-
-class changeSidesButton extends Button {
-    constructor(key ?: string) {
-        super("images/woodButton.jpg", key);
-    }
-
-    handlePress() : void {
-        this._toolbar.bIsTopOrLeft = !(this._toolbar.bIsTopOrLeft);
-        console.warn("Change Sides Button!");
-    }
-}
-
-class changeOrientationButton extends Button {
-    constructor(key ?: string) {
-        super("images/woodButton.jpg", key);
-    }
-
-    handlePress() : void {
-        this._toolbar.bIsHorizontal = !(this._toolbar.bIsHorizontal);
-        console.warn("Change Orientation Button!");
     }
 }

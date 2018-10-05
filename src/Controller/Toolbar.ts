@@ -2,22 +2,16 @@ import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../Main.js"
 
 const BUTTON_SIZE = 100;
 
+// ================
+// * BUTTON CLASS *
+// ================
+
 export abstract class Button {
     image : HTMLImageElement;
     size : number;
     xPos : number;
     yPos : number;
     protected hotkey : string | undefined;
-    protected _toolbar : Toolbar;
-    private bParentIsSet : boolean;
-
-    set toolbar(toolbar : Toolbar) {
-        if (this.bParentIsSet)
-            return;
-
-        this._toolbar = toolbar;
-        this.bParentIsSet = true;
-    }
 
     constructor(img : string, key ?: string) {
         this.size = BUTTON_SIZE;
@@ -26,7 +20,6 @@ export abstract class Button {
         this.xPos = 0;
         this.yPos = 0;
         this.hotkey = key;
-        this.bParentIsSet = false;
     }
 
     handleMouseClick(event : MouseEvent) : void {
@@ -46,6 +39,10 @@ export abstract class Button {
 }
 
 
+
+// =================
+// * TOOLBAR CLASS *
+// =================
 
 export class Toolbar {
     private _buttons : Button[];
@@ -144,7 +141,6 @@ export class Toolbar {
     addButton(button : Button) {
         button.size = this.buttonSize;
         this.setPosition(button);
-        button.toolbar = this;
         this._buttons.push(button);
 
         if (this.bIsHorizontal) {
