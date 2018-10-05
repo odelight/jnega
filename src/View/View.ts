@@ -4,10 +4,10 @@ import { Segment } from "../Model/Segment.js";
 import { Material } from "../Model/Material.js";
 import { getColorFromStretch } from "./StretchColorer";
 import { Toolbar, Button } from "../Controller/Toolbar.js";
-import { segmentAppearanceMap, SegmentAppearance } from "./SegmentAppearance.js"
+import { SegmentAppearance, getSegmentAppearance } from "./SegmentAppearance.js"
 
 export class View {
-    currentSegmentIsValid: boolean;
+    private currentSegmentIsValid: boolean;
     private currentSegmentMaterial : Material;
     private model : ModelAPI;
     private currentSegment : Segment | null = null;
@@ -38,7 +38,7 @@ export class View {
         this.toolbar = toolbar;
     }
 
-    setCurrentSegment(s : Segment, isValid : boolean) {
+    setCurrentSegment(s : Segment | null, isValid : boolean) {
         this.currentSegment = s;
         this.currentSegmentIsValid = isValid;
     }
@@ -88,14 +88,14 @@ export class View {
         if(this.currentSegment == null || this.model.isRunning()) {
             return;
         }
-        let sa = <SegmentAppearance> segmentAppearanceMap.get(this.currentSegment.material.name);
+        let sa = <SegmentAppearance> getSegmentAppearance(this.currentSegment.material.typeEnum);
         sa.drawSegment(this.currentSegment, false, this.currentSegmentIsValid, this.ctx);
     }
 
     drawPlacedSegments() {
         let segments : Segment[] = this.model.getSegments();
         for(let s of segments) {
-            let sa = <SegmentAppearance> segmentAppearanceMap.get(s.material.name);
+            let sa = <SegmentAppearance> getSegmentAppearance(s.material.typeEnum);
             sa.drawSegment(s, this.model.isRunning(), true, this.ctx);
         }
     }

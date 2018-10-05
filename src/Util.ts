@@ -5,4 +5,7 @@ export class Util{
         }
         return object;
     }
+    static assertUnreachable() : never {
+        throw "";
+    }
 }

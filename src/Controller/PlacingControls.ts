@@ -59,6 +59,7 @@ export class PlacingControls implements ControlScheme {
 
     private clearPoint() {
         this.lineStart = null;
+        this.view.setCurrentSegment(null, false);
     }
 
     private placePoint(point : Point) {

@@ -1,6 +1,7 @@
 import { Segment } from "../Model/Segment.js";
 import { getColorFromStretch, getColorFromRGB } from "./StretchColorer.js";
-import { wood, steel } from "../Model/Material.js";
+import { wood, steel, MaterialType } from "../Model/Material.js";
+import { Util } from "../Util.js";
 
 
 export interface SegmentAppearance {
@@ -51,9 +52,12 @@ let illegalDrawColor = getColorFromRGB(255,0,0);
 let woodAppearance = new StretchColoredAppearance(woodColor, illegalDrawColor);
 let steelAppearance = new StretchColoredAppearance(steelColor, illegalDrawColor);
 
-let segmentAppearanceMap = new Map<string, SegmentAppearance>();
-
-segmentAppearanceMap.set(wood.name, woodAppearance);
-segmentAppearanceMap.set(steel.name, steelAppearance);
-
-export {segmentAppearanceMap};
+export function getSegmentAppearance(m : MaterialType) {
+    switch(m) {
+        case MaterialType.Steel:
+            return steelAppearance;
+        case MaterialType.Wood:
+            return woodAppearance;
+    }
+    return Util.assertUnreachable();
+}
