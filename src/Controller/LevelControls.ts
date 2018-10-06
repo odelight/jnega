@@ -1,7 +1,7 @@
 import { Point } from "../Model/Point.js";
 import { View } from "../View/View.js";
 import { ModelAPI } from "../Model/ModelAPI.js";
-import { wood } from "../Model/Material.js";
+import { wood, steel } from "../Model/Material.js";
 import { Path } from "../Math/Path.js";
 import { Segment } from "../Model/Segment.js";
 import { ControlScheme } from "./Controller.js";
@@ -34,7 +34,7 @@ export class LevelControls implements ControlScheme {
     private initToolbar() {
         this.toolbar = new Toolbar();
         this.toolbar.addButton(new woodButton(this.placingControls, "Digit1"));
-        this.toolbar.addButton(new steelButton(this.placingControls, "Escape"));
+        this.toolbar.addButton(new steelButton(this.placingControls, "Digit2"));
     }
 
 
@@ -110,12 +110,12 @@ class steelButton extends Button {
     private placingControls : PlacingControls;
 
     constructor(controls : PlacingControls, key ?: string) {
-        super("images/woodButton.jpg", key);
+        super("images/steelButton.jpg", key);
         this.placingControls = controls;
     }
 
     handlePress() : void {
-        this.placingControls.selectedMaterial = wood;
-        console.warn("Pressed steelButton! WOOD selected though.");
+        this.placingControls.selectedMaterial = steel;
+        console.warn("Pressed steelButton!");
     }
 }

@@ -59,7 +59,7 @@ export class PlacingControls implements ControlScheme {
 
     private clearPoint() {
         this.lineStart = null;
-        this.view.setLineStart(null);
+        this.view.setCurrentSegment(null, false);
     }
 
     private placePoint(point : Point) {
@@ -70,7 +70,7 @@ export class PlacingControls implements ControlScheme {
             this.lineStart = point;
         } else {
             let segment = new Segment(this.lineStart, point, this.selectedMaterial);
-            if(segment.cost() > this.model.getRemainingBudget()) {
+            if(!this.isAffordable(segment)) {
                 alert("Can't afford to place segment!");
                 return;
             }
@@ -118,7 +118,9 @@ export class PlacingControls implements ControlScheme {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
-
+    private isAffordable(s : Segment) {
+        return s.cost() < this.model.getRemainingBudget()
+    }
 
     // ==================
     // * EVENT HANDLERS *
@@ -126,11 +128,15 @@ export class PlacingControls implements ControlScheme {
 
     handleMouseClick(event : MouseEvent) {
         this.placePoint(this.snapPoint(new Point(event.offsetX, event.offsetY)));
-        this.view.setLineStart(this.lineStart);
     }
 
     handleMouseMove(event : MouseEvent) {
-        this.view.setCursorPosition(this.snapPoint(new Point(event.offsetX, event.offsetY)));
+        let mousePosition = this.snapPoint(new Point(event.offsetX, event.offsetY));
+        this.view.setCursorPosition(mousePosition);
+        if(this.lineStart != null) {
+            let s : Segment = new Segment(this.lineStart, mousePosition, this.selectedMaterial);
+            this.view.setCurrentSegment(s, this.isAffordable(s));
+        }
     }
 
     handleKeyPress(event : KeyboardEvent) {
@@ -149,8 +155,6 @@ export class PlacingControls implements ControlScheme {
         }
 
     }
-
-
 
     handleScreenTouch(event : TouchEvent) {
         //handle screen touch event;

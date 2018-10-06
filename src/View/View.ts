@@ -1,13 +1,16 @@
 import { Point } from "../Model/Point.js";
 import { ModelAPI, GameState } from "../Model/ModelAPI.js";
 import { Segment } from "../Model/Segment.js";
-import { Material, wood } from "../Model/Material.js";
-import { getColorFromStretch } from "./SegmentColor.js";
+import { Material } from "../Model/Material.js";
+import { getColorFromStretch } from "./StretchColorer";
 import { Toolbar, Button } from "../Controller/Toolbar.js";
+import { SegmentAppearance, getSegmentAppearance } from "./SegmentAppearance.js"
 
 export class View {
+    private currentSegmentIsValid: boolean;
+    private currentSegmentMaterial : Material;
     private model : ModelAPI;
-    private lineStart : Point | null = null;
+    private currentSegment : Segment | null = null;
     private cursorPosition : Point | null = null;
     private ctx : CanvasRenderingContext2D;
     private cursorImage : ImageData;
@@ -34,9 +37,10 @@ export class View {
     setToolbarReference(toolbar : Toolbar) {
         this.toolbar = toolbar;
     }
-    
-    setLineStart(point : Point | null) {
-        this.lineStart = point;
+
+    setCurrentSegment(s : Segment | null, isValid : boolean) {
+        this.currentSegment = s;
+        this.currentSegmentIsValid = isValid;
     }
 
     setCursorPosition(point : Point) {
@@ -81,35 +85,20 @@ export class View {
     }
 
     drawCurrentSegment() {
-        if(this.lineStart == null || this.cursorPosition == null) {
+        if(this.currentSegment == null || this.model.isRunning()) {
             return;
         }
-        let segment = new Segment(this.lineStart, this.cursorPosition, wood);
-        let color = (segment.cost() > this.model.getRemainingBudget()) ? "#ff0000" : null;
-        this.drawSegment(segment, color);
+        let sa = <SegmentAppearance> getSegmentAppearance(this.currentSegment.material.typeEnum);
+        sa.drawSegment(this.currentSegment, false, this.currentSegmentIsValid, this.ctx);
     }
 
     drawPlacedSegments() {
         let segments : Segment[] = this.model.getSegments();
-        segments.forEach((s) => this.drawSegment(s));
+        for(let s of segments) {
+            let sa = <SegmentAppearance> getSegmentAppearance(s.material.typeEnum);
+            sa.drawSegment(s, this.model.isRunning(), true, this.ctx);
+        }
     }
-
-    drawSegment(segment : Segment, colorOverride : string | null = null) {
-      this.ctx.save();
-      this.ctx.lineWidth = 3;
-      if(colorOverride == null) {
-        this.ctx.strokeStyle = getColorFromStretch(segment.getStretch());
-      } else {
-          this.ctx.strokeStyle = colorOverride;
-      }
-      this.ctx.beginPath();
-      this.ctx.moveTo(segment.a.x, segment.a.y);
-      this.ctx.lineTo(segment.b.x, segment.b.y);
-      this.ctx.stroke();
-	  this.ctx.closePath();
-      this.ctx.restore();
-    }
-
     
     drawPoints() {
         let segments = this.model.getSegments();
